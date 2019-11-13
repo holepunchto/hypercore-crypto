@@ -81,9 +81,9 @@ exports.randomBytes = function (n) {
   return buf
 }
 
-exports.discoveryKey = function (tree) {
+exports.discoveryKey = function (publicKey) {
   var digest = bufferAlloc(32)
-  sodium.crypto_generichash(digest, HYPERCORE, tree)
+  sodium.crypto_generichash(digest, HYPERCORE, publicKey)
   return digest
 }
 
