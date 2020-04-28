@@ -51,3 +51,15 @@ tape('hash parent', function (t) {
   t.same(parent, Buffer.from('43563406adba8b34b133fdca32d0a458c5be769615e01df30e6535ccd3c075f0', 'hex'))
   t.end()
 })
+
+tape('capabilities', function (t) {
+  const key = Buffer.alloc(32).fill('secret')
+  const local = { rx: Buffer.alloc(32).fill('rx'), tx: Buffer.alloc(32).fill('tx') }
+  const remote = { rx: local.tx, tx: local.rx }
+
+  const cap = crypto.capability(key, local)
+  const remoteCap = crypto.remoteCapability(key, remote)
+
+  t.same(cap, remoteCap)
+  t.end()
+})
