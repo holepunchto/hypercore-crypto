@@ -93,7 +93,7 @@ exports.parent = function (a, b) {
   return out
 }
 
-exports.tree = function (roots, length) {
+exports.tree = function (roots, out) {
   const buffers = new Array(3 * roots.length + 1)
   var j = 0
 
@@ -106,18 +106,19 @@ exports.tree = function (roots, length) {
     buffers[j++] = encodeUInt64(r.size)
   }
 
-  const out = Buffer.allocUnsafe(40)
-
-  uint64be.encode(length || 0, out.slice(32))
-  sodium.crypto_generichash_batch(out.slice(0, 32), buffers)
-
+  if (!out) out = Buffer.allocUnsafe(32)
+  sodium.crypto_generichash_batch(out, buffers)
   return out
 }
 
-exports.treeFromHash = function (treeHash, length) {
+exports.signable = function (roots, length) {
   const out = Buffer.allocUnsafe(40)
-  treeHash.copy(out)
+
+  if (Buffer.isBuffer(roots)) roots.copy(out)
+  else exports.tree(roots, out.slice(0, 32))
+
   uint64be.encode(length, out.slice(32))
+
   return out
 }
 
