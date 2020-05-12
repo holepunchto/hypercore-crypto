@@ -63,3 +63,14 @@ tape('capabilities', function (t) {
   t.same(cap, remoteCap)
   t.end()
 })
+
+tape('tree', function (t) {
+  const roots = [
+    { index: 3, size: 11, hash: Buffer.alloc(32) },
+    { index: 9, size: 2, hash: Buffer.alloc(32) }
+  ]
+
+  t.same(crypto.tree(roots, 6), Buffer.from('334dd9d8f9a48c7b7e60affa8704a3597f87fe645fe83f1aada3a1216ea91e650000000000000006', 'hex'))
+  t.same(crypto.treeFromHash(Buffer.from('334dd9d8f9a48c7b7e60affa8704a3597f87fe645fe83f1aada3a1216ea91e65', 'hex'), 6), Buffer.from('334dd9d8f9a48c7b7e60affa8704a3597f87fe645fe83f1aada3a1216ea91e650000000000000006', 'hex'))
+  t.end()
+})

@@ -59,11 +59,15 @@ exports.verify = function (message, signature, publicKey) {
 }
 
 exports.data = function (data) {
-  return blake2b([
+  const out = Buffer.allocUnsafe(32)
+
+  sodium.crypto_generichash_batch(out, [
     LEAF_TYPE,
     encodeUInt64(data.length),
     data
   ])
+
+  return out
 }
 
 exports.leaf = function (leaf) {
@@ -77,28 +81,44 @@ exports.parent = function (a, b) {
     b = tmp
   }
 
-  return blake2b([
+  const out = Buffer.allocUnsafe(32)
+
+  sodium.crypto_generichash_batch(out, [
     PARENT_TYPE,
     encodeUInt64(a.size + b.size),
     a.hash,
     b.hash
   ])
+
+  return out
 }
 
-exports.tree = function (roots) {
-  var buffers = new Array(3 * roots.length + 1)
+exports.tree = function (roots, length) {
+  const buffers = new Array(3 * roots.length + 1)
   var j = 0
 
   buffers[j++] = ROOT_TYPE
 
   for (var i = 0; i < roots.length; i++) {
-    var r = roots[i]
+    const r = roots[i]
     buffers[j++] = r.hash
     buffers[j++] = encodeUInt64(r.index)
     buffers[j++] = encodeUInt64(r.size)
   }
 
-  return blake2b(buffers)
+  const out = Buffer.allocUnsafe(40)
+
+  uint64be.encode(length || 0, out.slice(32))
+  sodium.crypto_generichash_batch(out.slice(0, 32), buffers)
+
+  return out
+}
+
+exports.treeFromHash = function (treeHash, length) {
+  const out = Buffer.allocUnsafe(40)
+  treeHash.copy(out)
+  uint64be.encode(length, out.slice(32))
+  return out
 }
 
 exports.randomBytes = function (n) {
@@ -115,10 +135,4 @@ exports.discoveryKey = function (publicKey) {
 
 function encodeUInt64 (n) {
   return uint64be.encode(n, Buffer.allocUnsafe(8))
-}
-
-function blake2b (buffers) {
-  var digest = Buffer.allocUnsafe(32)
-  sodium.crypto_generichash_batch(digest, buffers)
-  return digest
 }
