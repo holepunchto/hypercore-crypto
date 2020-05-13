@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "sodium-javascript": "^0.5.6",
-    "sodium-native": "^3.0.1",
+    "sodium-native": "^3.1.1",
     "uint64be": "^3.0.0"
   },
   "devDependencies": {
