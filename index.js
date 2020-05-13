@@ -6,7 +6,7 @@ const LEAF_TYPE = Buffer.from([0])
 const PARENT_TYPE = Buffer.from([1])
 const ROOT_TYPE = Buffer.from([2])
 
-const HYPERCORE = Buffer.from('hypercore 9')
+const HYPERCORE = Buffer.from('hypercore')
 const HYPERCORE_CAP = Buffer.from('hypercore capability')
 
 exports.capability = function (key, split) {
