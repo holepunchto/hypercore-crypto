@@ -1,6 +1,6 @@
 {
   "name": "hypercore-crypto",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "The crypto primitives used in hypercore, extracted into a separate module",
   "main": "index.js",
   "dependencies": {
