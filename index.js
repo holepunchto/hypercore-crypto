@@ -123,13 +123,13 @@ exports.signable = function (roots, length) {
 }
 
 exports.randomBytes = function (n) {
-  var buf = Buffer.allocUnsafe(n)
+  const buf = Buffer.allocUnsafe(n)
   sodium.randombytes_buf(buf)
   return buf
 }
 
 exports.discoveryKey = function (publicKey) {
-  var digest = Buffer.allocUnsafe(32)
+  const digest = Buffer.allocUnsafe(32)
   sodium.crypto_generichash(digest, HYPERCORE, publicKey)
   return digest
 }
