@@ -134,6 +134,14 @@ exports.discoveryKey = function (publicKey) {
   return digest
 }
 
+if (sodium.sodium_free) {
+  exports.free = function (secureBuf) {
+    if (secureBuf.secure) sodium.sodium_free(secureBuf)
+  }
+} else {
+  exports.free = function () {}
+}
+
 function encodeUInt64 (n) {
   return uint64be.encode(n, Buffer.allocUnsafe(8))
 }
