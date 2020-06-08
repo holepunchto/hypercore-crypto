@@ -5,10 +5,40 @@ const uint64be = require('uint64be')
 const LEAF_TYPE = Buffer.from([0])
 const PARENT_TYPE = Buffer.from([1])
 const ROOT_TYPE = Buffer.from([2])
+const CAP_TYPE = Buffer.from([3])
 
 const HYPERCORE = Buffer.from('hypercore')
 const HYPERCORE_CAP = Buffer.from('hypercore capability')
 
+exports.writerCapability = function (key, secretKey, split) {
+  if (!split) return null
+
+  const out = Buffer.allocUnsafe(32)
+  sodium.crypto_generichash_batch(out, [
+    CAP_TYPE,
+    HYPERCORE_CAP,
+    split.tx.slice(0, 32),
+    key
+  ], split.rx.slice(0, 32))
+
+  return exports.sign(out, secretKey)
+}
+
+exports.verifyRemoteWriterCapability = function (key, cap, split) {
+  if (!split) return null
+
+  const out = Buffer.allocUnsafe(32)
+  sodium.crypto_generichash_batch(out, [
+    CAP_TYPE,
+    HYPERCORE_CAP,
+    split.rx.slice(0, 32),
+    key
+  ], split.tx.slice(0, 32))
+
+  return exports.verify(out, cap, key)
+}
+
+// TODO: add in the CAP_TYPE in a future version
 exports.capability = function (key, split) {
   if (!split) return null
 
@@ -22,6 +52,7 @@ exports.capability = function (key, split) {
   return out
 }
 
+// TODO: add in the CAP_TYPE in a future version
 exports.remoteCapability = function (key, split) {
   if (!split) return null
 
