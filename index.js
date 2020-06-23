@@ -1,4 +1,4 @@
-const sodium = require('./sodium')
+const sodium = require('sodium-universal')
 const uint64be = require('uint64be')
 
 // https://en.wikipedia.org/wiki/Merkle_tree#Second_preimage_attack
