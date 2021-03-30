@@ -79,6 +79,12 @@ exports.keyPair = function (seed) {
   }
 }
 
+exports.validateKeyPair = function (publicKey, secretKey) {
+  const pk = Buffer.allocUnsafe(sodium.crypto_box_PUBLICKEYBYTES)
+  sodium.crypto_sign_ed25519_sk_to_pk(pk, secretKey)
+  return pk.equals(publicKey)
+}
+
 exports.sign = function (message, secretKey) {
   const signature = Buffer.allocUnsafe(sodium.crypto_sign_BYTES)
   sodium.crypto_sign_detached(signature, message, secretKey)

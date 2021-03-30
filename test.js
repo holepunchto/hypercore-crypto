@@ -16,6 +16,15 @@ tape('key pair', function (t) {
   t.end()
 })
 
+tape('validate key pair', function (t) {
+  const keyPair1 = crypto.keyPair()
+  const keyPair2 = crypto.keyPair()
+
+  t.false(crypto.validateKeyPair(keyPair1.publicKey, keyPair2.secretKey))
+  t.true(crypto.validateKeyPair(keyPair1.publicKey, keyPair1.secretKey))
+  t.end()
+})
+
 tape('sign', function (t) {
   const keyPair = crypto.keyPair()
   const message = Buffer.from('hello world')
