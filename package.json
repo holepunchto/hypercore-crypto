@@ -4,6 +4,7 @@
   "description": "The crypto primitives used in hypercore, extracted into a separate module",
   "main": "index.js",
   "dependencies": {
+    "b4a": "^1.1.0",
     "sodium-universal": "^3.0.0",
     "uint64be": "^3.0.0"
   },
