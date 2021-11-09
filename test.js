@@ -1,13 +1,6 @@
 const tape = require('tape')
 const crypto = require('./')
 
-tape('randomBytes', function (t) {
-  const buffer = crypto.randomBytes(100)
-  t.ok(Buffer.isBuffer(buffer))
-  t.notSame(crypto.randomBytes(100), buffer)
-  t.end()
-})
-
 tape('key pair', function (t) {
   const keyPair = crypto.keyPair()
 
@@ -61,18 +54,6 @@ tape('hash parent', function (t) {
   t.end()
 })
 
-tape('capabilities', function (t) {
-  const key = Buffer.alloc(32).fill('secret')
-  const local = { rx: Buffer.alloc(32).fill('rx'), tx: Buffer.alloc(32).fill('tx') }
-  const remote = { rx: local.tx, tx: local.rx }
-
-  const cap = crypto.capability(key, local)
-  const remoteCap = crypto.remoteCapability(key, remote)
-
-  t.same(cap, remoteCap)
-  t.end()
-})
-
 tape('tree', function (t) {
   const roots = [
     { index: 3, size: 11, hash: Buffer.alloc(32) },
@@ -80,7 +61,5 @@ tape('tree', function (t) {
   ]
 
   t.same(crypto.tree(roots), Buffer.from('0e576a56b478cddb6ffebab8c494532b6de009466b2e9f7af9143fc54b9eaa36', 'hex'))
-  t.same(crypto.signable(Buffer.from('0e576a56b478cddb6ffebab8c494532b6de009466b2e9f7af9143fc54b9eaa36', 'hex'), 6), Buffer.from('0e576a56b478cddb6ffebab8c494532b6de009466b2e9f7af9143fc54b9eaa360600000000000000', 'hex'))
-  t.same(crypto.signable(roots, 6), Buffer.from('0e576a56b478cddb6ffebab8c494532b6de009466b2e9f7af9143fc54b9eaa360600000000000000', 'hex'))
   t.end()
 })
