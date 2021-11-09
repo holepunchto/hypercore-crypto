@@ -87,8 +87,22 @@ exports.tree = function (roots, out) {
   return out
 }
 
+exports.randomBytes = function (n) {
+  const buf = b4a.allocUnsafe(n)
+  sodium.randombytes_buf(buf)
+  return buf
+}
+
 exports.discoveryKey = function (publicKey) {
   const digest = b4a.allocUnsafe(32)
   sodium.crypto_generichash(digest, HYPERCORE, publicKey)
   return digest
+}
+
+if (sodium.sodium_free) {
+  exports.free = function (secureBuf) {
+    if (secureBuf.secure) sodium.sodium_free(secureBuf)
+  }
+} else {
+  exports.free = function () {}
 }

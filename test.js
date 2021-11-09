@@ -1,6 +1,13 @@
 const tape = require('tape')
 const crypto = require('./')
 
+tape('randomBytes', function (t) {
+  const buffer = crypto.randomBytes(100)
+  t.ok(Buffer.isBuffer(buffer))
+  t.notSame(crypto.randomBytes(100), buffer)
+  t.end()
+})
+
 tape('key pair', function (t) {
   const keyPair = crypto.keyPair()
 

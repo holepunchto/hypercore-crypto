@@ -51,6 +51,10 @@ Hash a parent node in a merkle tree. `left` and `right` should look like this:
 
 Hashes the merkle root of the tree. `peaks` should be an array of the peaks of the tree and should look like above.
 
+#### `buffer = crypto.randomBytes(size)`
+
+Returns a buffer containing random bytes of size `size`.
+
 #### `hash = crypto.discoveryKey(publicKey)`
 
 Return a hash derived from a `publicKey` that can used for discovery
