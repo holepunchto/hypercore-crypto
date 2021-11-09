@@ -1,5 +1,7 @@
 # hypercore-crypto
 
+> :warning: Hypercore 9 uses v2 of this module while Hypercore 10 uses v3.
+
 The crypto primitives used in hypercore, extracted into a separate module
 
 ```
@@ -48,10 +50,6 @@ Hash a parent node in a merkle tree. `left` and `right` should look like this:
 #### `hash = crypto.tree(peaks)`
 
 Hashes the merkle root of the tree. `peaks` should be an array of the peaks of the tree and should look like above.
-
-#### `dataToSign = crypto.signable(peaksOrHash, length)`
-
-Encodes a buffer to sign. `length` should be how many leaf nodes exist in the tree.
 
 #### `buffer = crypto.randomBytes(size)`
 

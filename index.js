@@ -1,71 +1,13 @@
 const sodium = require('sodium-universal')
-const uint64be = require('uint64be')
+const c = require('compact-encoding')
 const b4a = require('b4a')
 
 // https://en.wikipedia.org/wiki/Merkle_tree#Second_preimage_attack
 const LEAF_TYPE = b4a.from([0])
 const PARENT_TYPE = b4a.from([1])
 const ROOT_TYPE = b4a.from([2])
-const CAP_TYPE = b4a.from([3])
 
 const HYPERCORE = b4a.from('hypercore')
-const HYPERCORE_CAP = b4a.from('hypercore capability')
-
-exports.writerCapability = function (key, secretKey, split) {
-  if (!split) return null
-
-  const out = b4a.allocUnsafe(32)
-  sodium.crypto_generichash_batch(out, [
-    CAP_TYPE,
-    HYPERCORE_CAP,
-    split.tx.subarray(0, 32),
-    key
-  ], split.rx.subarray(0, 32))
-
-  return exports.sign(out, secretKey)
-}
-
-exports.verifyRemoteWriterCapability = function (key, cap, split) {
-  if (!split) return null
-
-  const out = b4a.allocUnsafe(32)
-  sodium.crypto_generichash_batch(out, [
-    CAP_TYPE,
-    HYPERCORE_CAP,
-    split.rx.subarray(0, 32),
-    key
-  ], split.tx.subarray(0, 32))
-
-  return exports.verify(out, cap, key)
-}
-
-// TODO: add in the CAP_TYPE in a future version
-exports.capability = function (key, split) {
-  if (!split) return null
-
-  const out = b4a.allocUnsafe(32)
-  sodium.crypto_generichash_batch(out, [
-    HYPERCORE_CAP,
-    split.tx.subarray(0, 32),
-    key
-  ], split.rx.subarray(0, 32))
-
-  return out
-}
-
-// TODO: add in the CAP_TYPE in a future version
-exports.remoteCapability = function (key, split) {
-  if (!split) return null
-
-  const out = b4a.allocUnsafe(32)
-  sodium.crypto_generichash_batch(out, [
-    HYPERCORE_CAP,
-    split.rx.subarray(0, 32),
-    key
-  ], split.tx.subarray(0, 32))
-
-  return out
-}
 
 exports.keyPair = function (seed) {
   const publicKey = b4a.allocUnsafe(sodium.crypto_sign_PUBLICKEYBYTES)
@@ -101,15 +43,11 @@ exports.data = function (data) {
 
   sodium.crypto_generichash_batch(out, [
     LEAF_TYPE,
-    encodeUInt64(data.length),
+    c.encode(c.uint64, data.byteLength),
     data
   ])
 
   return out
-}
-
-exports.leaf = function (leaf) {
-  return exports.data(leaf.data)
 }
 
 exports.parent = function (a, b) {
@@ -123,7 +61,7 @@ exports.parent = function (a, b) {
 
   sodium.crypto_generichash_batch(out, [
     PARENT_TYPE,
-    encodeUInt64(a.size + b.size),
+    c.encode(c.uint64, a.size + b.size),
     a.hash,
     b.hash
   ])
@@ -133,30 +71,19 @@ exports.parent = function (a, b) {
 
 exports.tree = function (roots, out) {
   const buffers = new Array(3 * roots.length + 1)
-  var j = 0
+  let j = 0
 
   buffers[j++] = ROOT_TYPE
 
-  for (var i = 0; i < roots.length; i++) {
+  for (let i = 0; i < roots.length; i++) {
     const r = roots[i]
     buffers[j++] = r.hash
-    buffers[j++] = encodeUInt64(r.index)
-    buffers[j++] = encodeUInt64(r.size)
+    buffers[j++] = c.encode(c.uint64, r.index)
+    buffers[j++] = c.encode(c.uint64, r.size)
   }
 
   if (!out) out = b4a.allocUnsafe(32)
   sodium.crypto_generichash_batch(out, buffers)
-  return out
-}
-
-exports.signable = function (roots, length) {
-  const out = b4a.allocUnsafe(40)
-
-  if (b4a.isBuffer(roots)) b4a.copy(roots, out)
-  else exports.tree(roots, out.subarray(0, 32))
-
-  uint64be.encode(length, out.subarray(32))
-
   return out
 }
 
@@ -178,8 +105,4 @@ if (sodium.sodium_free) {
   }
 } else {
   exports.free = function () {}
-}
-
-function encodeUInt64 (n) {
-  return uint64be.encode(n, b4a.allocUnsafe(8))
 }
