@@ -40,7 +40,7 @@ tape('sign', function (t) {
 tape('hash leaf', function (t) {
   const data = Buffer.from('hello world')
 
-  t.same(crypto.data(data), Buffer.from('ccfa4259ee7c41e411e5770973a49c5ceffb5272d6a37f2c6f2dac2190f7e2b7', 'hex'))
+  t.same(crypto.data(data), Buffer.from('9f1b578fd57a4df015493d2886aec9600eef913c3bb009768c7f0fb875996308', 'hex'))
   t.end()
 })
 
@@ -57,7 +57,7 @@ tape('hash parent', function (t) {
     hash: crypto.data(data)
   })
 
-  t.same(parent, Buffer.from('43563406adba8b34b133fdca32d0a458c5be769615e01df30e6535ccd3c075f0', 'hex'))
+  t.same(parent, Buffer.from('3ad0c9b58b771d1b7707e1430f37c23a23dd46e0c7c3ab9c16f79d25f7c36804', 'hex'))
   t.end()
 })
 
@@ -79,8 +79,8 @@ tape('tree', function (t) {
     { index: 9, size: 2, hash: Buffer.alloc(32) }
   ]
 
-  t.same(crypto.tree(roots), Buffer.from('334dd9d8f9a48c7b7e60affa8704a3597f87fe645fe83f1aada3a1216ea91e65', 'hex'))
-  t.same(crypto.signable(Buffer.from('334dd9d8f9a48c7b7e60affa8704a3597f87fe645fe83f1aada3a1216ea91e65', 'hex'), 6), Buffer.from('334dd9d8f9a48c7b7e60affa8704a3597f87fe645fe83f1aada3a1216ea91e650000000000000006', 'hex'))
-  t.same(crypto.signable(roots, 6), Buffer.from('334dd9d8f9a48c7b7e60affa8704a3597f87fe645fe83f1aada3a1216ea91e650000000000000006', 'hex'))
+  t.same(crypto.tree(roots), Buffer.from('0e576a56b478cddb6ffebab8c494532b6de009466b2e9f7af9143fc54b9eaa36', 'hex'))
+  t.same(crypto.signable(Buffer.from('0e576a56b478cddb6ffebab8c494532b6de009466b2e9f7af9143fc54b9eaa36', 'hex'), 6), Buffer.from('0e576a56b478cddb6ffebab8c494532b6de009466b2e9f7af9143fc54b9eaa360600000000000000', 'hex'))
+  t.same(crypto.signable(roots, 6), Buffer.from('0e576a56b478cddb6ffebab8c494532b6de009466b2e9f7af9143fc54b9eaa360600000000000000', 'hex'))
   t.end()
 })

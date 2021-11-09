@@ -1,5 +1,5 @@
 const sodium = require('sodium-universal')
-const uint64be = require('uint64be')
+const c = require('compact-encoding')
 const b4a = require('b4a')
 
 // https://en.wikipedia.org/wiki/Merkle_tree#Second_preimage_attack
@@ -101,7 +101,7 @@ exports.data = function (data) {
 
   sodium.crypto_generichash_batch(out, [
     LEAF_TYPE,
-    encodeUInt64(data.length),
+    c.encode(c.uint64, data.byteLength),
     data
   ])
 
@@ -123,7 +123,7 @@ exports.parent = function (a, b) {
 
   sodium.crypto_generichash_batch(out, [
     PARENT_TYPE,
-    encodeUInt64(a.size + b.size),
+    c.encode(c.uint64, a.size + b.size),
     a.hash,
     b.hash
   ])
@@ -140,8 +140,8 @@ exports.tree = function (roots, out) {
   for (var i = 0; i < roots.length; i++) {
     const r = roots[i]
     buffers[j++] = r.hash
-    buffers[j++] = encodeUInt64(r.index)
-    buffers[j++] = encodeUInt64(r.size)
+    buffers[j++] = c.encode(c.uint64, r.index)
+    buffers[j++] = c.encode(c.uint64, r.size)
   }
 
   if (!out) out = b4a.allocUnsafe(32)
@@ -155,7 +155,7 @@ exports.signable = function (roots, length) {
   if (b4a.isBuffer(roots)) b4a.copy(roots, out)
   else exports.tree(roots, out.subarray(0, 32))
 
-  uint64be.encode(length, out.subarray(32))
+  c.uint64.encode({ start: 32, end: 40, buffer: out }, length)
 
   return out
 }
@@ -178,8 +178,4 @@ if (sodium.sodium_free) {
   }
 } else {
   exports.free = function () {}
-}
-
-function encodeUInt64 (n) {
-  return uint64be.encode(n, b4a.allocUnsafe(8))
 }
