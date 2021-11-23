@@ -25,7 +25,7 @@ exports.keyPair = function (seed) {
 exports.validateKeyPair = function (keyPair) {
   const pk = b4a.allocUnsafe(sodium.crypto_sign_PUBLICKEYBYTES)
   sodium.crypto_sign_ed25519_sk_to_pk(pk, keyPair.secretKey)
-  return pk.equals(keyPair.publicKey)
+  return b4a.equals(pk, keyPair.publicKey)
 }
 
 exports.sign = function (message, secretKey) {
