@@ -60,6 +60,11 @@ Returns a buffer containing random bytes of size `size`.
 Return a hash derived from a `publicKey` that can used for discovery
 without disclosing the public key.
 
+#### `list = crypto.namespace(name, count)`
+
+Make a list of namespaces from a specific publicly known name.
+Use this to namespace capabilities or hashes / signatures across algorithms.
+
 ## License
 
 MIT

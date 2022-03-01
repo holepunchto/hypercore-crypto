@@ -106,3 +106,19 @@ if (sodium.sodium_free) {
 } else {
   exports.free = function () {}
 }
+
+exports.namespace = function (name, count) {
+  const buf = b4a.allocUnsafe(32 * count)
+  const list = new Array(count)
+
+  const ns = b4a.allocUnsafe(32)
+  sodium.crypto_generichash(ns, typeof name === 'string' ? b4a.from(name) : name)
+
+  for (let i = 0; i < list.length; i++) {
+    const sub = list[i] = buf.subarray(32 * i, 32 * i + 32)
+    sub[0] = i
+    sodium.crypto_generichash(sub, sub.subarray(0, 1), ns)
+  }
+
+  return list
+}
