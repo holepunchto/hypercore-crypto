@@ -111,13 +111,13 @@ exports.namespace = function (name, count) {
   const buf = b4a.allocUnsafe(32 * count)
   const list = new Array(count)
 
-  const ns = b4a.allocUnsafe(32)
-  sodium.crypto_generichash(ns, typeof name === 'string' ? b4a.from(name) : name)
+  const ns = b4a.allocUnsafe(33)
+  sodium.crypto_generichash(ns.subarray(0, 32), typeof name === 'string' ? b4a.from(name) : name)
 
   for (let i = 0; i < list.length; i++) {
-    const sub = list[i] = buf.subarray(32 * i, 32 * i + 32)
-    sub[0] = i
-    sodium.crypto_generichash(sub, sub.subarray(0, 1), ns)
+    list[i] = buf.subarray(32 * i, 32 * i + 32)
+    ns[32] = i
+    sodium.crypto_generichash(list[i], ns)
   }
 
   return list
