@@ -108,17 +108,24 @@ if (sodium.sodium_free) {
 }
 
 exports.namespace = function (name, count) {
-  const buf = b4a.allocUnsafe(32 * count)
-  const list = new Array(count)
+  const ids = typeof count === 'number' ? range(count) : count
+  const buf = b4a.allocUnsafe(32 * ids.length)
+  const list = new Array(ids.length)
 
   const ns = b4a.allocUnsafe(33)
   sodium.crypto_generichash(ns.subarray(0, 32), typeof name === 'string' ? b4a.from(name) : name)
 
   for (let i = 0; i < list.length; i++) {
     list[i] = buf.subarray(32 * i, 32 * i + 32)
-    ns[32] = i
+    ns[32] = ids[i]
     sodium.crypto_generichash(list[i], ns)
   }
 
   return list
+}
+
+function range (count) {
+  const arr = new Array(count)
+  for (let i = 0; i < count; i++) arr[i] = i
+  return arr
 }
