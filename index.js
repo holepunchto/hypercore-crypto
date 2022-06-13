@@ -1,6 +1,7 @@
 const sodium = require('sodium-universal')
 const c = require('compact-encoding')
 const b4a = require('b4a')
+const Namespace = require('./lib/namespace')
 
 // https://en.wikipedia.org/wiki/Merkle_tree#Second_preimage_attack
 const LEAF_TYPE = b4a.from([0])
@@ -116,9 +117,9 @@ exports.namespace = function (name, count) {
   sodium.crypto_generichash(ns.subarray(0, 32), typeof name === 'string' ? b4a.from(name) : name)
 
   for (let i = 0; i < list.length; i++) {
-    list[i] = buf.subarray(32 * i, 32 * i + 32)
+    list[i] = new Namespace(buf.subarray(32 * i, 32 * i + 32))
     ns[32] = ids[i]
-    sodium.crypto_generichash(list[i], ns)
+    sodium.crypto_generichash(list[i].ns, ns)
   }
 
   return list
