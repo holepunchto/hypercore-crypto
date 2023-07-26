@@ -3,6 +3,9 @@
   "version": "3.3.1",
   "description": "The crypto primitives used in hypercore, extracted into a separate module",
   "main": "index.js",
+  "files": [
+    "index.js"
+  ],
   "dependencies": {
     "b4a": "^1.1.0",
     "compact-encoding": "^2.5.1",
