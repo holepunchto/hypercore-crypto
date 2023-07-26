@@ -1,6 +1,7 @@
 const test = require('brittle')
 const b4a = require('b4a')
 const crypto = require('./')
+const sodium = require('sodium-universal')
 
 test('randomBytes', function (t) {
   const buffer = crypto.randomBytes(100)
@@ -63,6 +64,23 @@ test('tree', function (t) {
   ]
 
   t.alike(crypto.tree(roots), b4a.from('0e576a56b478cddb6ffebab8c494532b6de009466b2e9f7af9143fc54b9eaa36', 'hex'))
+})
+
+test('hash', function (t) {
+  const hash1 = b4a.allocUnsafe(32)
+  const hash2 = b4a.allocUnsafe(32)
+  const hash3 = b4a.allocUnsafe(32)
+
+  const input = [b4a.alloc(24, 0x3), b4a.alloc(12, 0x63)]
+
+  sodium.crypto_generichash(hash1, b4a.concat(input))
+  sodium.crypto_generichash_batch(hash2, input)
+  crypto.hash(input, hash3)
+
+  t.alike(hash2, hash1)
+  t.alike(hash3, hash1)
+  t.alike(crypto.hash(input), hash1)
+  t.alike(crypto.hash(b4a.concat(input)), hash1)
 })
 
 test('namespace', function (t) {
