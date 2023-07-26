@@ -87,6 +87,15 @@ exports.tree = function (roots, out) {
   return out
 }
 
+exports.hash = function (data, out) {
+  if (!out) out = b4a.allocUnsafe(32)
+  if (!Array.isArray(data)) data = [data]
+
+  sodium.crypto_generichash_batch(out, data)
+
+  return out
+}
+
 exports.randomBytes = function (n) {
   const buf = b4a.allocUnsafe(n)
   sodium.randombytes_buf(buf)
