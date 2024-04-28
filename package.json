@@ -7,13 +7,13 @@
     "index.js"
   ],
   "dependencies": {
-    "b4a": "^1.1.0",
-    "compact-encoding": "^2.5.1",
-    "sodium-universal": "^4.0.0"
+    "b4a": "^1.6.6",
+    "compact-encoding": "^2.15.0",
+    "sodium-universal": "^4.0.1"
   },
   "devDependencies": {
-    "brittle": "^1.6.0",
-    "standard": "^14.3.3"
+    "brittle": "^3.5.0",
+    "standard": "^17.1.0"
   },
   "scripts": {
     "test": "standard && brittle test.js"
