@@ -121,9 +121,13 @@ if (sodium.sodium_free) {
 
 exports.namespace = function (name, count) {
   const ids = typeof count === 'number' ? range(count) : count
-  const buf = b4a.allocUnsafe(32 * ids.length)
+
+  // Namespaces are long-lived, so better to use a dedicated slab
+  const buf = b4a.allocUnsafeSlow(32 * ids.length)
+
   const list = new Array(ids.length)
 
+  // ns is emhemeral, so default slab
   const ns = b4a.allocUnsafe(33)
   sodium.crypto_generichash(ns.subarray(0, 32), typeof name === 'string' ? b4a.from(name) : name)
 

@@ -90,6 +90,8 @@ test('namespace', function (t) {
 
   t.alike(ns[0], b4a.from('a931a0155b5c09e6d28628236af83c4b8a6af9af60986edeede9dc5d63192bf7', 'hex'))
   t.alike(ns[1], b4a.from('742c9d833d430af4c48a8705e91631eecf295442bbca18996e597097723b1061', 'hex'))
+  t.is(ns[0].buffer.byteLength < 1000, true, 'no default slab')
+  t.is(ns[0].buffer, ns[1].buffer, 'slab shared between entries')
 })
 
 test('namespace (random access)', function (t) {
