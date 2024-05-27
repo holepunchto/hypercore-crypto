@@ -10,8 +10,10 @@ const ROOT_TYPE = b4a.from([2])
 const HYPERCORE = b4a.from('hypercore')
 
 exports.keyPair = function (seed) {
-  const publicKey = b4a.allocUnsafe(sodium.crypto_sign_PUBLICKEYBYTES)
-  const secretKey = b4a.allocUnsafe(sodium.crypto_sign_SECRETKEYBYTES)
+  // key pairs might stay around for a while, so better not to use a default slab to avoid retaining it completely
+  const slab = b4a.allocUnsafeSlow(sodium.crypto_sign_PUBLICKEYBYTES + sodium.crypto_sign_SECRETKEYBYTES)
+  const publicKey = slab.subarray(0, sodium.crypto_sign_PUBLICKEYBYTES)
+  const secretKey = slab.subarray(sodium.crypto_sign_PUBLICKEYBYTES)
 
   if (seed) sodium.crypto_sign_seed_keypair(publicKey, secretKey, seed)
   else sodium.crypto_sign_keypair(publicKey, secretKey)
@@ -103,7 +105,8 @@ exports.randomBytes = function (n) {
 }
 
 exports.discoveryKey = function (publicKey) {
-  const digest = b4a.allocUnsafe(32)
+  // Discovery keys might stay around for a while, so better not to use slab memory (for better gc)
+  const digest = b4a.allocUnsafeSlow(32)
   sodium.crypto_generichash(digest, HYPERCORE, publicKey)
   return digest
 }
