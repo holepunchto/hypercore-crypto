@@ -24,7 +24,7 @@ test('validate key pair', function (t) {
   t.ok(crypto.validateKeyPair({ publicKey: keyPair1.publicKey, secretKey: keyPair1.secretKey }))
 })
 
-test('sign', function (t) {
+test.solo('sign', function (t) {
   const keyPair = crypto.keyPair()
   const message = b4a.from('hello world')
 
@@ -33,6 +33,7 @@ test('sign', function (t) {
   t.is(sig.length, 64)
   t.ok(crypto.verify(message, sig, keyPair.publicKey))
   t.absent(crypto.verify(message, b4a.alloc(64), keyPair.publicKey))
+  t.is(sig.buffer.byteLength, sodium.crypto_sign_BYTES, 'dedicated slab for signatures')
 })
 
 test('hash leaf', function (t) {
