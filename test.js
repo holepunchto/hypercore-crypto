@@ -24,7 +24,7 @@ test('validate key pair', function (t) {
   t.ok(crypto.validateKeyPair({ publicKey: keyPair1.publicKey, secretKey: keyPair1.secretKey }))
 })
 
-test.solo('sign', function (t) {
+test('sign', function (t) {
   const keyPair = crypto.keyPair()
   const message = b4a.from('hello world')
 
