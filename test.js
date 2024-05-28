@@ -14,6 +14,8 @@ test('key pair', function (t) {
 
   t.is(keyPair.publicKey.length, 32)
   t.is(keyPair.secretKey.length, 64)
+  t.is(keyPair.publicKey.buffer.byteLength, 96, 'small slab')
+  t.is(keyPair.publicKey.buffer, keyPair.secretKey.buffer, 'public and seret key share the same slab')
 })
 
 test('validate key pair', function (t) {
@@ -88,6 +90,8 @@ test('namespace', function (t) {
 
   t.alike(ns[0], b4a.from('a931a0155b5c09e6d28628236af83c4b8a6af9af60986edeede9dc5d63192bf7', 'hex'))
   t.alike(ns[1], b4a.from('742c9d833d430af4c48a8705e91631eecf295442bbca18996e597097723b1061', 'hex'))
+  t.is(ns[0].buffer.byteLength < 1000, true, 'no default slab')
+  t.is(ns[0].buffer, ns[1].buffer, 'slab shared between entries')
 })
 
 test('namespace (random access)', function (t) {
@@ -109,4 +113,10 @@ test('random namespace', function (t) {
   const ns2 = crypto.namespace(s, [1, 2, 3, 4, 5, 6, 7, 8, 9])
 
   t.alike(ns1, ns2)
+})
+
+test('discovery key does not use slabs', function (t) {
+  const key = b4a.allocUnsafe(32)
+  const discKey = crypto.discoveryKey(key)
+  t.is(discKey.buffer.byteLength, 32, 'does not use slab memory')
 })
