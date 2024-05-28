@@ -31,7 +31,8 @@ exports.validateKeyPair = function (keyPair) {
 }
 
 exports.sign = function (message, secretKey) {
-  const signature = b4a.allocUnsafe(sodium.crypto_sign_BYTES)
+  // Dedicated slab for the signature, to avoid retaining unneeded mem and for security
+  const signature = b4a.allocUnsafeSlow(sodium.crypto_sign_BYTES)
   sodium.crypto_sign_detached(signature, message, secretKey)
   return signature
 }

@@ -35,6 +35,7 @@ test('sign', function (t) {
   t.is(sig.length, 64)
   t.ok(crypto.verify(message, sig, keyPair.publicKey))
   t.absent(crypto.verify(message, b4a.alloc(64), keyPair.publicKey))
+  t.is(sig.buffer.byteLength, sodium.crypto_sign_BYTES, 'dedicated slab for signatures')
 })
 
 test('hash leaf', function (t) {
