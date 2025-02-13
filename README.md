@@ -1,7 +1,5 @@
 # hypercore-crypto
 
-> :warning: Hypercore 9 uses v2 of this module while Hypercore 10 uses v3.
-
 The crypto primitives used in hypercore, extracted into a separate module
 
 ```
