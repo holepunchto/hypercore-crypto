@@ -41,6 +41,40 @@ exports.verify = function (message, signature, publicKey) {
   return sodium.crypto_sign_verify_detached(signature, message, publicKey)
 }
 
+exports.encrypt = function (message, publicKey) {
+  const ciphertext = b4a.alloc(message.byteLength + sodium.crypto_box_SEALBYTES)
+  sodium.crypto_box_seal(ciphertext, message, publicKey)
+  return ciphertext
+}
+
+exports.decrypt = function (ciphertext, keyPair) {
+  if (ciphertext.byteLength < sodium.crypto_box_SEALBYTES) return null
+
+  const plaintext = b4a.alloc(ciphertext.byteLength - sodium.crypto_box_SEALBYTES)
+
+  if (!sodium.crypto_box_seal_open(plaintext, ciphertext, keyPair.publicKey, keyPair.secretKey)) {
+    return null
+  }
+
+  return plaintext
+}
+
+exports.encryptionKeyPair = function (seed) {
+  const publicKey = b4a.alloc(sodium.crypto_box_PUBLICKEYBYTES)
+  const secretKey = b4a.alloc(sodium.crypto_box_SECRETKEYBYTES)
+
+  if (seed) {
+    sodium.crypto_box_seed_keypair(publicKey, secretKey, seed)
+  } else {
+    sodium.crypto_box_keypair(publicKey, secretKey)
+  }
+
+  return {
+    publicKey,
+    secretKey
+  }
+}
+
 exports.data = function (data) {
   const out = b4a.allocUnsafe(32)
 
