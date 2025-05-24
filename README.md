@@ -19,7 +19,7 @@ console.log(keyPair) // prints a ed25519 keypair
 
 #### `keyPair = crypto.keyPair()`
 
-Returns an `ED25519` keypair that can used for tree signing.
+Returns an `ED25519` keypair that can be used for tree signing.
 
 #### `signature = crypto.sign(message, secretKey)`
 
