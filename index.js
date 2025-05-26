@@ -165,7 +165,7 @@ exports.namespace = function (name, count) {
 
   const list = new Array(ids.length)
 
-  // ns is emhemeral, so default slab
+  // ns is ephemeral, so default slab
   const ns = b4a.allocUnsafe(33)
   sodium.crypto_generichash(ns.subarray(0, 32), typeof name === 'string' ? b4a.from(name) : name)
 
