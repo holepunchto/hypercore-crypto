@@ -8,7 +8,7 @@ npm install hypercore-crypto
 
 ## Usage
 
-``` js
+```js
 const crypto = require('hypercore-crypto')
 
 const keyPair = crypto.keyPair()

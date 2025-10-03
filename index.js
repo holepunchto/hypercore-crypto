@@ -11,7 +11,9 @@ const HYPERCORE = b4a.from('hypercore')
 
 exports.keyPair = function (seed) {
   // key pairs might stay around for a while, so better not to use a default slab to avoid retaining it completely
-  const slab = b4a.allocUnsafeSlow(sodium.crypto_sign_PUBLICKEYBYTES + sodium.crypto_sign_SECRETKEYBYTES)
+  const slab = b4a.allocUnsafeSlow(
+    sodium.crypto_sign_PUBLICKEYBYTES + sodium.crypto_sign_SECRETKEYBYTES
+  )
   const publicKey = slab.subarray(0, sodium.crypto_sign_PUBLICKEYBYTES)
   const secretKey = slab.subarray(sodium.crypto_sign_PUBLICKEYBYTES)
 
@@ -52,9 +54,18 @@ exports.encrypt = function (message, publicKey) {
 exports.decrypt = function (ciphertext, keyPair) {
   if (ciphertext.byteLength < sodium.crypto_box_SEALBYTES) return null
 
-  const plaintext = b4a.alloc(ciphertext.byteLength - sodium.crypto_box_SEALBYTES)
+  const plaintext = b4a.alloc(
+    ciphertext.byteLength - sodium.crypto_box_SEALBYTES
+  )
 
-  if (!sodium.crypto_box_seal_open(plaintext, ciphertext, keyPair.publicKey, keyPair.secretKey)) {
+  if (
+    !sodium.crypto_box_seal_open(
+      plaintext,
+      ciphertext,
+      keyPair.publicKey,
+      keyPair.secretKey
+    )
+  ) {
     return null
   }
 
@@ -142,7 +153,8 @@ exports.randomBytes = function (n) {
 }
 
 exports.discoveryKey = function (key) {
-  if (!key || key.byteLength !== 32) throw new Error('Must pass a 32 byte buffer')
+  if (!key || key.byteLength !== 32)
+    throw new Error('Must pass a 32 byte buffer')
   // Discovery keys might stay around for a while, so better not to use slab memory (for better gc)
   const digest = b4a.allocUnsafeSlow(32)
   sodium.crypto_generichash(digest, HYPERCORE, key)
@@ -167,7 +179,10 @@ exports.namespace = function (name, count) {
 
   // ns is ephemeral, so default slab
   const ns = b4a.allocUnsafe(33)
-  sodium.crypto_generichash(ns.subarray(0, 32), typeof name === 'string' ? b4a.from(name) : name)
+  sodium.crypto_generichash(
+    ns.subarray(0, 32),
+    typeof name === 'string' ? b4a.from(name) : name
+  )
 
   for (let i = 0; i < list.length; i++) {
     list[i] = buf.subarray(32 * i, 32 * i + 32)
@@ -178,7 +193,7 @@ exports.namespace = function (name, count) {
   return list
 }
 
-function range (count) {
+function range(count) {
   const arr = new Array(count)
   for (let i = 0; i < count; i++) arr[i] = i
   return arr
