@@ -11,7 +11,9 @@ const HYPERCORE = b4a.from('hypercore')
 
 exports.keyPair = function (seed) {
   // key pairs might stay around for a while, so better not to use a default slab to avoid retaining it completely
-  const slab = b4a.allocUnsafeSlow(sodium.crypto_sign_PUBLICKEYBYTES + sodium.crypto_sign_SECRETKEYBYTES)
+  const slab = b4a.allocUnsafeSlow(
+    sodium.crypto_sign_PUBLICKEYBYTES + sodium.crypto_sign_SECRETKEYBYTES
+  )
   const publicKey = slab.subarray(0, sodium.crypto_sign_PUBLICKEYBYTES)
   const secretKey = slab.subarray(sodium.crypto_sign_PUBLICKEYBYTES)
 
@@ -80,11 +82,7 @@ exports.encryptionKeyPair = function (seed) {
 exports.data = function (data) {
   const out = b4a.allocUnsafe(32)
 
-  sodium.crypto_generichash_batch(out, [
-    LEAF_TYPE,
-    c.encode(c.uint64, data.byteLength),
-    data
-  ])
+  sodium.crypto_generichash_batch(out, [LEAF_TYPE, c.encode(c.uint64, data.byteLength), data])
 
   return out
 }
@@ -178,7 +176,7 @@ exports.namespace = function (name, count) {
   return list
 }
 
-function range (count) {
+function range(count) {
   const arr = new Array(count)
   for (let i = 0; i < count; i++) arr[i] = i
   return arr
