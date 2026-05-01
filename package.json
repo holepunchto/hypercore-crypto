@@ -8,7 +8,7 @@
   ],
   "dependencies": {
     "b4a": "^1.6.6",
-    "compact-encoding": "^2.15.0",
+    "compact-encoding": "^3.0.0",
     "sodium-universal": "^5.0.0"
   },
   "devDependencies": {
