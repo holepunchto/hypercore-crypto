@@ -152,3 +152,9 @@ test('discovery key does not use slabs', function (t) {
   const discKey = crypto.discoveryKey(key)
   t.is(discKey.buffer.byteLength, 32, 'does not use slab memory')
 })
+
+test('hash a string', function (t) {
+  const hash = crypto.hash('abc')
+
+  t.alike(hash, b4a.from('bddd813c634239723171ef3fee98579b94964e3bb1cb3e427262c8c068d52319', 'hex'))
+})
