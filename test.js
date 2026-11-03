@@ -85,6 +85,42 @@ test('tree', function (t) {
   )
 })
 
+test('data, parent and tree match the batch encoding at every size', function (t) {
+  const c = require('compact-encoding')
+  const ref = (parts) => {
+    const out = b4a.alloc(32)
+    sodium.crypto_generichash_batch(out, parts)
+    return out
+  }
+  const u64 = (n) => c.encode(c.uint64, n)
+
+  for (const len of [0, 1, 3064, 3065, 70000]) {
+    const data = b4a.alloc(len, len & 0xff)
+    t.alike(crypto.data(data), ref([b4a.from([0]), u64(len), data]), 'data ' + len)
+  }
+
+  const a = { index: 0, size: 2 ** 40 + 3, hash: crypto.data(b4a.from('a')) }
+  const b = { index: 2, size: 2 ** 33, hash: crypto.data(b4a.from('b')) }
+  const p1 = crypto.parent(b, a)
+  const p2 = crypto.parent(a, b)
+  t.alike(p1, ref([b4a.from([1]), u64(a.size + b.size), a.hash, b.hash]))
+  t.alike(p1, p2)
+  t.not(p1.buffer === p2.buffer && p1.byteOffset === p2.byteOffset, 'results are not shared')
+
+  for (const n of [0, 1, 64, 65]) {
+    const roots = []
+    const parts = [b4a.from([2])]
+    for (let i = 0; i < n; i++) {
+      const r = { index: i * 2 ** 34, size: i + 1, hash: b4a.alloc(32, i) }
+      roots.push(r)
+      parts.push(r.hash, u64(r.index), u64(r.size))
+    }
+    t.alike(crypto.tree(roots), ref(parts), 'tree ' + n)
+  }
+
+  t.exception(() => crypto.tree([{ index: -1, size: 1, hash: a.hash }]))
+})
+
 test('hash', function (t) {
   const hash1 = b4a.allocUnsafe(32)
   const hash2 = b4a.allocUnsafe(32)
