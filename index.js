@@ -9,6 +9,14 @@ const ROOT_TYPE = b4a.from([2])
 
 const HYPERCORE = b4a.from('hypercore')
 
+// Scratch input for the fixed-layout hashes below (type byte, uint64s, child hashes).
+// Each use writes it and hashes it synchronously, so no caller can observe it, and no
+// per-call array, uint64 buffer or batch call is needed.
+const MAX_SCRATCH_ROOTS = 64
+const SCRATCH = b4a.allocUnsafeSlow(1 + 48 * MAX_SCRATCH_ROOTS)
+const LEAF_HEADER = SCRATCH.subarray(0, 9)
+const PARENT_INPUT = SCRATCH.subarray(0, 73)
+
 exports.keyPair = function (seed) {
   // key pairs might stay around for a while, so better not to use a default slab to avoid retaining it completely
   const slab = b4a.allocUnsafeSlow(
@@ -81,8 +89,17 @@ exports.encryptionKeyPair = function (seed) {
 
 exports.data = function (data) {
   const out = b4a.allocUnsafe(32)
+  const len = 9 + data.byteLength
 
-  sodium.crypto_generichash_batch(out, [LEAF_TYPE, c.encode(c.uint64, data.byteLength), data])
+  SCRATCH[0] = LEAF_TYPE[0]
+  writeUint64(SCRATCH, 1, data.byteLength)
+
+  if (len <= SCRATCH.byteLength && data.length === data.byteLength) {
+    SCRATCH.set(data, 9)
+    sodium.crypto_generichash(out, SCRATCH.subarray(0, len))
+  } else {
+    sodium.crypto_generichash_batch(out, [LEAF_HEADER, data])
+  }
 
   return out
 }
@@ -96,17 +113,47 @@ exports.parent = function (a, b) {
 
   const out = b4a.allocUnsafe(32)
 
-  sodium.crypto_generichash_batch(out, [
-    PARENT_TYPE,
-    c.encode(c.uint64, a.size + b.size),
-    a.hash,
-    b.hash
-  ])
+  if (!isHash(a.hash) || !isHash(b.hash)) {
+    sodium.crypto_generichash_batch(out, [
+      PARENT_TYPE,
+      c.encode(c.uint64, a.size + b.size),
+      a.hash,
+      b.hash
+    ])
+    return out
+  }
+
+  PARENT_INPUT[0] = PARENT_TYPE[0]
+  writeUint64(PARENT_INPUT, 1, a.size + b.size)
+  PARENT_INPUT.set(a.hash, 9)
+  PARENT_INPUT.set(b.hash, 41)
+
+  sodium.crypto_generichash(out, PARENT_INPUT)
 
   return out
 }
 
 exports.tree = function (roots, out) {
+  if (!out) out = b4a.allocUnsafe(32)
+
+  const len = 1 + 48 * roots.length
+  const input = roots.length <= MAX_SCRATCH_ROOTS ? SCRATCH : b4a.allocUnsafe(len)
+
+  input[0] = ROOT_TYPE[0]
+
+  for (let i = 0, j = 1; i < roots.length; i++, j += 48) {
+    const r = roots[i]
+    if (!isHash(r.hash)) return treeBatch(roots, out)
+    input.set(r.hash, j)
+    writeUint64(input, j + 32, r.index)
+    writeUint64(input, j + 40, r.size)
+  }
+
+  sodium.crypto_generichash(out, input.subarray(0, len))
+  return out
+}
+
+function treeBatch(roots, out) {
   const buffers = new Array(3 * roots.length + 1)
   let j = 0
 
@@ -119,7 +166,6 @@ exports.tree = function (roots, out) {
     buffers[j++] = c.encode(c.uint64, r.size)
   }
 
-  if (!out) out = b4a.allocUnsafe(32)
   sodium.crypto_generichash_batch(out, buffers)
   return out
 }
@@ -174,6 +220,27 @@ exports.namespace = function (name, count) {
   }
 
   return list
+}
+
+// 32 one-byte elements, so .set() copies it byte for byte
+function isHash(h) {
+  return h.byteLength === 32 && h.length === 32
+}
+
+// Same bytes and range check as c.encode(c.uint64, n)
+function writeUint64(buf, offset, n) {
+  if (!(n >= 0 && n <= Number.MAX_SAFE_INTEGER)) {
+    throw new Error(`uint must be between 0 and ${Number.MAX_SAFE_INTEGER}, use biguint`)
+  }
+  const hi = Math.floor(n / 0x100000000)
+  buf[offset] = n
+  buf[offset + 1] = n >>> 8
+  buf[offset + 2] = n >>> 16
+  buf[offset + 3] = n >>> 24
+  buf[offset + 4] = hi
+  buf[offset + 5] = hi >>> 8
+  buf[offset + 6] = hi >>> 16
+  buf[offset + 7] = hi >>> 24
 }
 
 function range(count) {
