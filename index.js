@@ -10,6 +10,7 @@ const ROOT_TYPE = b4a.from([2])
 const HYPERCORE = b4a.from('hypercore')
 
 exports.keyPair = function (seed) {
+  if (!b4a.isBuffer(seed)) throw new Error('Must pass a buffer')
   // key pairs might stay around for a while, so better not to use a default slab to avoid retaining it completely
   const slab = b4a.allocUnsafeSlow(
     sodium.crypto_sign_PUBLICKEYBYTES + sodium.crypto_sign_SECRETKEYBYTES
